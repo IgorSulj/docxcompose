@@ -16,18 +16,21 @@ class Element(ABC, Frozen):
         pass
 
     @staticmethod 
-    def _coerce_one(element: ElementLike) -> "Element":
+    def coerce_one(element: ElementLike) -> "Element":
         if isinstance(element, Element):
             return element
         else:
-            raise NotImplementedError()
+            return Text(element)
 
     @staticmethod
     def coerced(element: IntoElement) -> Iterable["Element"]:
-        if isinstance(element, (Element, str, int, float)):
-            raise NotImplementedError()
+        if isinstance(element, Element):
+            yield element
+        elif isinstance(element, (str, int, float)):
+            yield Text(element)
         else:
-            raise NotImplementedError()
+            for e in element:
+                yield Element.coerce_one(e)
 
 
 class Text(Element):
