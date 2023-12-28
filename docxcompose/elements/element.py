@@ -23,7 +23,7 @@ class Element(ABC, Frozen):
             return Text(element)
 
     @staticmethod
-    def coerced(element: IntoElement) -> Iterable["Element"]:
+    def iter_coerced(element: IntoElement) -> Iterable["Element"]:
         if isinstance(element, Element):
             yield element
         elif isinstance(element, (str, int, float)):
@@ -31,6 +31,15 @@ class Element(ABC, Frozen):
         else:
             for e in element:
                 yield Element.coerce_one(e)
+
+    @staticmethod
+    def coerced(element: IntoElement) -> "Element":
+        if isinstance(element, Element):
+            return element
+        elif isinstance(element, (str, int, float)):
+            return Text(element)
+        else:
+            return Composed(Element.iter_coerced(element))
 
 
 class Text(Element):
@@ -42,3 +51,15 @@ class Text(Element):
     
     def _add_to_run(self, run: Run):
         run.add_text(self.text)
+
+
+class Composed(Element):
+    __slots__ = ("elements", "_frozen")
+
+    def __init__(self, elements: Iterable[ElementLike]) -> None:
+        self.elements = Element.iter_coerced(elements)
+        self._frozen = True
+
+    def _add_to_run(self, run: Run):
+        for element in self.elements:
+            element._add_to_run(run)
