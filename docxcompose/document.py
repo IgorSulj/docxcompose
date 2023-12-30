@@ -11,8 +11,8 @@ class Document:
     def __init__(self, *elems: IntoElement) -> None:
         self._document: document.Document = docx.Document()
         for elem in elems:
-            run = self._document.add_paragraph().add_run()
-            Element.coerced(elem)._add_to_run(run)
+            paragraph = self._document.add_paragraph()
+            Element.coerced(elem)._add_to_paragraph(paragraph)
 
     def save(self, path: Union[str, IO[bytes]]) -> None:
         self._document.save(path)

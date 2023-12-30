@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, Union
 
-from docx.text.run import Run
+from docx.text.paragraph import Paragraph
 
 from docxcompose.frozen import Frozen
 
@@ -11,8 +11,11 @@ IntoElement = Union[ElementLike, Iterable[ElementLike]]
 
 
 class Element(ABC, Frozen):
+    Like = ElementLike
+    Into = IntoElement
+
     @abstractmethod
-    def _add_to_run(self, run: Run):
+    def _add_to_paragraph(self, paragraph: Paragraph):
         pass
 
     @staticmethod 
@@ -49,8 +52,8 @@ class Text(Element):
         self.text = str(text)
         self._frozen = True
     
-    def _add_to_run(self, run: Run):
-        run.add_text(self.text)
+    def _add_to_paragraph(self, paragraph):
+        paragraph.add_run(self.text)
 
 
 class Composed(Element):
@@ -60,6 +63,6 @@ class Composed(Element):
         self.elements = Element.iter_coerced(elements)
         self._frozen = True
 
-    def _add_to_run(self, run: Run):
+    def _add_to_paragraph(self, paragraph):
         for element in self.elements:
-            element._add_to_run(run)
+            element._add_to_paragraph(paragraph)

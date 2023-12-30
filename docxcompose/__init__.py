@@ -1,3 +1,2 @@
 from .document import Document
-from .elements import Element, Text
-
+from .elements import Element, Hyperlink, Text
