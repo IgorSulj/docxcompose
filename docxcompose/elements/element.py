@@ -26,7 +26,7 @@ class Element(ABC, Frozen):
             return Text(element)
 
     @staticmethod
-    def _iter_created(*elements: IntoElement) -> Iterable["Element"]:
+    def iter_created(*elements: IntoElement) -> Iterable["Element"]:
         for element in elements:
             if isinstance(element, Element):
                 yield element
@@ -41,7 +41,7 @@ class Element(ABC, Frozen):
         if len(elements) == 1 and isinstance(elements[0], (Element, str, int, float)):
             return Element.create_one(elements[0])
         else:
-            return Composed(Element._iter_created(*elements))
+            return Composed(Element.iter_created(*elements))
 
 
 class Text(Element):
@@ -59,7 +59,7 @@ class Composed(Element):
     __slots__ = ("elements", "_frozen")
 
     def __init__(self, elements: Iterable[ElementLike]) -> None:
-        self.elements = Element._iter_created(elements)
+        self.elements = Element.iter_created(elements)
         self._frozen = True
 
     def _add_to_paragraph(self, paragraph):
