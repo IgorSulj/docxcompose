@@ -19,30 +19,26 @@ class Element(ABC, Frozen):
         pass
 
     @staticmethod 
-    def coerce_one(element: ElementLike) -> "Element":
+    def create_one(element: ElementLike) -> "Element":
         if isinstance(element, Element):
             return element
         else:
             return Text(element)
 
     @staticmethod
-    def iter_coerced(element: IntoElement) -> Iterable["Element"]:
-        if isinstance(element, Element):
-            yield element
-        elif isinstance(element, (str, int, float)):
-            yield Text(element)
-        else:
-            for e in element:
-                yield Element.coerce_one(e)
+    def _iter_created(*elements: IntoElement) -> Iterable["Element"]:
+        for element in elements:
+            if isinstance(element, Element):
+                yield element
+            elif isinstance(element, (str, int, float)):
+                yield Text(element)
+            else:
+                for e in element:
+                    yield Element.create_one(e)
 
     @staticmethod
-    def coerced(element: IntoElement) -> "Element":
-        if isinstance(element, Element):
-            return element
-        elif isinstance(element, (str, int, float)):
-            return Text(element)
-        else:
-            return Composed(Element.iter_coerced(element))
+    def create(*elements: IntoElement) -> "Element":
+        return Composed(Element._iter_created(*elements))
 
 
 class Text(Element):
@@ -60,7 +56,7 @@ class Composed(Element):
     __slots__ = ("elements", "_frozen")
 
     def __init__(self, elements: Iterable[ElementLike]) -> None:
-        self.elements = Element.iter_coerced(elements)
+        self.elements = Element._iter_created(elements)
         self._frozen = True
 
     def _add_to_paragraph(self, paragraph):
