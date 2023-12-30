@@ -38,7 +38,10 @@ class Element(ABC, Frozen):
 
     @staticmethod
     def create(*elements: IntoElement) -> "Element":
-        return Composed(Element._iter_created(*elements))
+        if len(elements) == 1 and isinstance(elements[0], (Element, str, int, float)):
+            return Element.create_one(elements[0])
+        else:
+            return Composed(Element._iter_created(*elements))
 
 
 class Text(Element):
